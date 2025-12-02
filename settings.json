@@ -1,10 +1,10 @@
 {
   "board": {
-    "rows": 20,
-    "cols": 20
+    "rows": 10,
+    "cols": 10
   },
   "ships": {
-    "carrier": 3,
+    "carrier": 1,
     "battleship": 1,
     "cruiser": 1,
     "submarine": 1,
