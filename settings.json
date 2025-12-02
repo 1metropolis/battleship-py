@@ -1,13 +1,14 @@
 {
   "board": {
-    "rows": 10, // default: 10
-    "cols": 10  // default: 10
+
+    "rows": 10,
+    "cols": 10
   },
   "ships": {
-    "carrier": 1,       // default: 1
-    "battleship": 1,    // default: 1
-    "cruiser": 1,       // default: 1
-    "submarine": 1,     // default: 1
-    "destroyer": 1      // default: 1
+    "carrier": 1,
+    "battleship": 1,
+    "cruiser": 1,
+    "submarine": 1,
+    "destroyer": 1
   }
 }
