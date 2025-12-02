@@ -1,5 +1,5 @@
 import pygame
-from draw import draw_grid
+from modules.draw import draw_grid
 import curses
 import firing
 
