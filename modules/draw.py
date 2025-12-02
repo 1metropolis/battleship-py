@@ -140,7 +140,7 @@ def show_splash(screen, text, duration=1000, font_size=72, bg_color=(25, 40, 60)
 
 # plane bombs the battleship
 def animate_shot(screen, boat_manager, attacker, defender, target_row, target_col,
-                 cell_size, origin_x, origin_y, speed=10):
+                 cell_size, origin_x, origin_y, speed=20):
     """
     Animate a plane flying across the target and spawn hit/miss effect.
     Only calls boat_manager.fire_at when the plane reaches the target.
