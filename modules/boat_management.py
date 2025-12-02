@@ -3,13 +3,15 @@
 # hit/miss tracking, and sunk ship detection   #
 #################################################
 
-SHIP_LENGTHS = {
-    "carrier": 5,
-    "battleship": 4,
-    "cruiser": 3,
-    "submarine": 3,
-    "destroyer": 2
+SHIP_TYPES = {
+    "carrier": [5, "C"],
+    "battleship": [4, "B"],
+    "cruiser": [3, "R"],
+    "submarine": [3, "U"],
+    "destroyer": [2, "D"]
 }
+
+
 
 class BoatManager:
     def __init__(self, rows, cols, ships):
@@ -35,41 +37,47 @@ class BoatManager:
     # ------------------------------
     def set_player_ships(self, player, board):
         """
-        board: 2D list with "S" for ship cells, "~" for empty
+        board: 2D list with "~" for empty and ship letters for ship cells
         """
         self.player_boards[player] = board
         self.player_ship_coords[player] = {}
         self.sunk_ships[player] = []
 
         visited = [[False]*self.cols for _ in range(self.rows)]
+
+        # Create a reverse lookup: letter -> ship_name
+        char_to_name = {v[1]: k for k, v in SHIP_TYPES.items()}
+
         for r in range(self.rows):
             for c in range(self.cols):
-                if board[r][c] == "S" and not visited[r][c]:
+                cell = board[r][c]
+                if cell != "~" and not visited[r][c]:  # any ship char
                     ship_cells = self._flood_fill_ship(board, r, c, visited)
-                    length = len(ship_cells)
-                    ship_name = None
-                    # Find ship name by length that is not already assigned
-                    for name, l in SHIP_LENGTHS.items():
-                        if l == length and name not in self.player_ship_coords[player]:
-                            ship_name = name
-                            break
-                    if ship_name:
-                        self.player_ship_coords[player][ship_name] = ship_cells
+                    ship_char = cell
+                    ship_name = char_to_name[ship_char]
+                    self.player_ship_coords[player][ship_name] = ship_cells
 
     def _flood_fill_ship(self, board, r, c, visited):
         """
-        Collect all connected 'S' cells horizontally or vertically.
+        Collect all connected cells of the same ship character.
         """
         stack = [(r, c)]
         ship_cells = []
+        target_char = board[r][c]
+
         while stack:
             row, col = stack.pop()
             if 0 <= row < self.rows and 0 <= col < self.cols:
-                if board[row][col] == "S" and not visited[row][col]:
+                if board[row][col] == target_char and not visited[row][col]:
                     visited[row][col] = True
                     ship_cells.append((row, col))
                     # Only horizontal/vertical neighbors
-                    stack.extend([(row+1, col), (row-1, col), (row, col+1), (row, col-1)])
+                    stack.extend([
+                        (row+1, col),
+                        (row-1, col),
+                        (row, col+1),
+                        (row, col-1)
+                    ])
         return ship_cells
 
     # ------------------------------
@@ -90,7 +98,7 @@ class BoatManager:
         if hits[row][col] in ("X", "O"):
             return "repeat"
 
-        if board[row][col] == "S":
+        if board[row][col] != "~":
             board[row][col] = "X"
             hits[row][col] = "X"
             sunk_ship = self._is_ship_sunk(defender, row, col)
@@ -98,6 +106,7 @@ class BoatManager:
                 self.sunk_ships[defender].append(sunk_ship)
                 return f"sunk:{sunk_ship}"
             return "hit"
+
         else:
             board[row][col] = "O"
             hits[row][col] = "O"
@@ -124,6 +133,6 @@ class BoatManager:
         """
         for player in [1, 2]:
             board = self.player_boards[player]
-            if all(cell != "S" for row in board for cell in row):
+            if all(cell == "~" or cell == "X" for row in board for cell in row):
                 return 2 if player == 1 else 1
         return None

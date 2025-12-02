@@ -74,17 +74,36 @@ def draw_grid(screen, rows, cols, cell_size, origin_x, origin_y):
 
 
 # draw ships placed on board using board variable
+
+SHIP_COLORS = {
+    "C": (200, 0, 0),      # Carrier - Red
+    "B": (255, 165, 0),    # Battleship - Orange
+    "R": (0, 200, 0),      # Cruiser - Green
+    "U": (0, 100, 255),    # Submarine - Blueish
+    "D": (160, 82, 45)     # Destroyer - Brown
+}
+
+
 def draw_placed_ships(screen, board, cell_size, origin_x, origin_y):
     """
     Draw all ships already placed on the board.
     """
     for r, row in enumerate(board):
         for c, cell in enumerate(row):
-            if cell == "S":
+            if cell != "~":  # any ship char
+                color = SHIP_COLORS.get(cell, (150, 150, 150))  # fallback gray
                 rect = pygame.Rect(origin_x + c * cell_size,
                                    origin_y + r * cell_size,
                                    cell_size, cell_size)
-                pygame.draw.rect(screen, (150, 150, 150), rect)
+                pygame.draw.rect(screen, color, rect)
+                pygame.draw.rect(screen, (255, 255, 255), rect, 1)  # outline
+                
+                # add a cool stripe pattern for subs
+                if cell == "U":  # Submarine
+                    pygame.draw.line(screen, (0, 150, 255), rect.topleft, rect.bottomright, 2)
+                    pygame.draw.line(screen, (0, 150, 255), rect.topright, rect.bottomleft, 2)
+
+
 
 # draw highlighted ship for placement
 def draw_ship_preview(screen, preview_cells, cell_size, origin_x, origin_y, valid):

@@ -1,5 +1,6 @@
 import pygame
 import sys
+from modules import boat_management
 from modules.draw import (
     draw_instructions,
     compute_cell_size,
@@ -10,6 +11,7 @@ from modules.draw import (
     draw_cursor,
     show_splash
 )
+
 
 SHIP_LENGTHS = {
     "carrier": 5,
@@ -72,7 +74,7 @@ def placement_phase(screen, rows, cols, ships, player_label, boat_manager, playe
         for i in range(ship_len):
             r = cursor_row + (i if orientation == "V" else 0)
             c = cursor_col + (i if orientation == "H" else 0)
-            if r >= rows or c >= cols or board[r][c] == "S":
+            if r >= rows or c >= cols or board[r][c] != "~":
                 valid = False
             preview_cells.append((r, c))
 
@@ -100,9 +102,13 @@ def placement_phase(screen, rows, cols, ships, player_label, boat_manager, playe
                 elif event.key == pygame.K_RIGHT:
                     cursor_col = min(cols - 1, cursor_col + 1)
                 elif event.key == pygame.K_SPACE and valid:
+                    
                     # Commit ship placement
+                    
+                    ship_char = boat_management.SHIP_TYPES[ship_name][1]
                     for r, c in preview_cells:
-                        board[r][c] = "S"
+                        board[r][c] = ship_char
+
                     current_ship_index += 1
 
                     if current_ship_index >= total_ships:
