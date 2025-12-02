@@ -7,7 +7,8 @@ from modules.draw import (
     draw_grid,
     draw_placed_ships,
     draw_ship_preview,
-    draw_cursor
+    draw_cursor,
+    show_splash
 )
 
 SHIP_LENGTHS = {
@@ -24,6 +25,8 @@ def placement_phase(screen, rows, cols, ships, player_label, boat_manager, playe
     Handles ship placement for a single player.
     Updates boat_manager with the final board.
     """
+    show_splash(screen, f"{player_label} - Assemble your Navy!", duration=2000)
+    
     pygame.font.init()
     clock = pygame.time.Clock()
 
@@ -51,7 +54,7 @@ def placement_phase(screen, rows, cols, ships, player_label, boat_manager, playe
         # Draw instructions
         instructions = (
             f"{player_label}, position your {ship_name.capitalize()}!\n"
-            "Use Arrow Keys to navigate, \"R\" to turn, and < Space > to anchor in place!"
+            "Use Arrow Keys to navigate, \"R\" to turn, and Space to anchor in place!"
         )
         instructions_bottom = draw_instructions(screen, instructions, screen.get_width())
 

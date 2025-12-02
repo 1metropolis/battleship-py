@@ -4,10 +4,10 @@
     "cols": 10
   },
   "ships": {
-    "carrier": 1,
-    "battleship": 1,
-    "cruiser": 1,
-    "submarine": 1,
+    "carrier": 0,
+    "battleship": 0,
+    "cruiser": 0,
+    "submarine": 0,
     "destroyer": 1
   }
 }
