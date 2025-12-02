@@ -74,7 +74,6 @@ def placement_phase(screen, rows, cols, ships, player_label, boat_manager, playe
             c = cursor_col + (i if orientation == "H" else 0)
             if r >= rows or c >= cols or board[r][c] == "S":
                 valid = False
-                break
             preview_cells.append((r, c))
 
         draw_ship_preview(screen, preview_cells, cell_size, origin_x, origin_y, valid)
