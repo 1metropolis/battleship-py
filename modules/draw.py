@@ -83,6 +83,87 @@ SHIP_COLORS = {
     "D": (160, 82, 45)     # Destroyer - Brown
 }
 
+def draw_placed_ships(screen, board, cell_size, origin_x, origin_y):
+    """
+    Draw all ships already placed on the board with unique warship designs.
+    """
+    plane_img = pygame.image.load("assets/plane.png").convert_alpha()
+
+    for r, row in enumerate(board):
+        for c, cell in enumerate(row):
+            if cell == "~":
+                continue
+
+            rect = pygame.Rect(origin_x + c * cell_size,
+                               origin_y + r * cell_size,
+                               cell_size, cell_size)
+
+            if cell == "C":  # Carrier
+                orientation = "H"
+                if (r > 0 and board[r-1][c] == "C") or \
+                   (r < len(board)-1 and board[r+1][c] == "C"):
+                    orientation = "V"
+                draw_carrier_cell(screen, rect, plane_img, orientation)
+
+            elif cell == "B":  # Battleship
+                draw_battleship_cell(screen, rect)
+
+            elif cell == "R":  # Cruiser
+                draw_cruiser_cell(screen, rect)
+
+            elif cell == "U":  # Submarine
+                draw_submarine_cell(screen, rect)
+
+            elif cell == "D":  # Destroyer
+                draw_destroyer_cell(screen, rect)
+
+
+def draw_battleship_cell(screen, rect):
+    """Battleship: dark grey with diagonal deck plates"""
+    base_color = (120, 120, 120)
+    accent = (85, 85, 85)
+    pygame.draw.rect(screen, base_color, rect)
+    # Diagonal plate lines (like armored hull plating)
+    pygame.draw.line(screen, accent, rect.topleft, rect.bottomright, 2)
+    pygame.draw.line(screen, accent, rect.topright, rect.bottomleft, 2)
+
+
+def draw_cruiser_cell(screen, rect):
+    """Cruiser: medium grey with horizontal deck lines"""
+    base_color = (135, 135, 135)
+    line_color = (95, 95, 95)
+    pygame.draw.rect(screen, base_color, rect)
+    # Two horizontal deck lines
+    y1 = rect.top + rect.height * 0.33
+    y2 = rect.top + rect.height * 0.66
+    pygame.draw.line(screen, line_color, (rect.left, y1), (rect.right, y1), 2)
+    pygame.draw.line(screen, line_color, (rect.left, y2), (rect.right, y2), 2)
+
+
+def draw_submarine_cell(screen, rect):
+    """Submarine: blue-grey with rounded ends feel (center dot)"""
+    hull_color = (100, 110, 125)
+    pygame.draw.rect(screen, hull_color, rect)
+    # Small porthole
+    pygame.draw.circle(screen, (75, 85, 100), rect.center, int(rect.width * 0.15))
+
+
+def draw_destroyer_cell(screen, rect):
+    """Destroyer: light grey with single center stripe"""
+    base_color = (145, 145, 145)
+    stripe = (105, 105, 105)
+    pygame.draw.rect(screen, base_color, rect)
+    # Vertical center stripe
+    cx = rect.centerx
+    pygame.draw.line(screen, stripe, (cx, rect.top), (cx, rect.bottom), 3)
+
+
+def draw_carrier_cell(screen, rect, plane_img, orientation):
+    """Carrier: grey flight deck with runway and plane"""
+    deck_color = (115, 115, 115)
+    pygame.draw.rect(screen, deck_color, rect)
+    draw_carrier_plane(screen, rect, plane_img, orientation)
+
 
 def draw_carrier_plane(screen, rect, plane_img, orientation):
     """
@@ -135,59 +216,6 @@ def draw_carrier_plane(screen, rect, plane_img, orientation):
             2
         )
 
-
-def draw_placed_ships(screen, board, cell_size, origin_x, origin_y):
-    """
-    Draw all ships already placed on the board with unique designs.
-    """
-    import pygame
-    # Load plane image once
-    plane_img = pygame.image.load("assets/plane.png").convert_alpha()
-
-    for r, row in enumerate(board):
-        for c, cell in enumerate(row):
-            rect = pygame.Rect(origin_x + c * cell_size,
-                               origin_y + r * cell_size,
-                               cell_size, cell_size)
-
-            if cell == "~":
-                continue
-
-            # Base color for ships
-            color = (150, 150, 150)  # default grey
-
-            # Special color/patterns per ship type
-            if cell == "U":  # submarine
-                color = (120, 150, 200)  # greyish-blue
-
-
-            pygame.draw.rect(screen, color, rect)
-
-            if cell == "C":
-                # Determine orientation from neighbors
-                orientation = "H"
-                if r > 0 and board[r-1][c] == "C":
-                    orientation = "V"
-                if r < len(board)-1 and board[r+1][c] == "C":
-                    orientation = "V"
-
-                draw_carrier_plane(screen, rect, plane_img, orientation)
-
-
-            # Add other ship types with patterns
-            elif cell == "B":  # Battleship
-                pygame.draw.rect(screen, color, rect)
-                # optional hatch lines
-                pygame.draw.line(screen, (180, 180, 180), rect.topleft, rect.bottomright, 2)
-                pygame.draw.line(screen, (180, 180, 180), rect.topright, rect.bottomleft, 2)
-
-            elif cell == "R":  # Cruiser
-                pygame.draw.rect(screen, color, rect)
-                pygame.draw.circle(screen, (170, 170, 170), rect.center, cell_size//4, 2)
-
-            elif cell == "D":  # Destroyer
-                pygame.draw.rect(screen, color, rect)
-                pygame.draw.line(screen, (200,200,200), (rect.left, rect.centery), (rect.right, rect.centery), 2)
 
 # draw highlighted ship for placement
 def draw_ship_preview(screen, preview_cells, cell_size, origin_x, origin_y, valid):
