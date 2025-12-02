@@ -233,3 +233,118 @@ def animate_shot(screen, boat_manager, attacker, defender, target_row, target_co
     pygame.time.wait(300)
     return result
 
+def load_firing_assets():
+    import pygame
+    CROSSHAIR_PATH = "assets/crosshair.png"
+    SMOKE_PATH = "assets/smoke.png"
+    EXPLOSION_PATH = "assets/explosion.png"
+    PLANE_PATH = "assets/plane.png"
+    return {
+        "crosshair": pygame.image.load(CROSSHAIR_PATH).convert_alpha(),
+        "smoke": pygame.image.load(SMOKE_PATH).convert_alpha(),
+        "explosion": pygame.image.load(EXPLOSION_PATH).convert_alpha(),
+        "plane": pygame.image.load(PLANE_PATH).convert_alpha(),
+    }
+
+def draw_firing_screen(screen, rows, cols, cell_size, origin_x, origin_y, hits, crosshair_row, crosshair_col, instruction_text, assets):
+    import pygame
+    screen.fill((25, 40, 60))
+    draw_grid(screen, rows, cols, cell_size, origin_x, origin_y)
+    # Draw hits/misses
+    for r in range(rows):
+        for c in range(cols):
+            x = origin_x + c * cell_size
+            y = origin_y + r * cell_size
+            if hits[r][c] == "X":
+                img = pygame.transform.scale(assets["explosion"], (cell_size, cell_size))
+                screen.blit(img, (x, y))
+            elif hits[r][c] == "O":
+                img = pygame.transform.scale(assets["smoke"], (cell_size, cell_size))
+                screen.blit(img, (x, y))
+    # Draw crosshair
+    crosshair_scaled = pygame.transform.scale(assets["crosshair"], (cell_size, cell_size))
+    screen.blit(crosshair_scaled, (origin_x + crosshair_col * cell_size, origin_y + crosshair_row * cell_size))
+    # Draw instructions
+    font = pygame.font.SysFont(None, 32)
+    instr_text = font.render(instruction_text, True, (255,255,255))
+    screen.blit(instr_text, (20, 20))
+    pygame.display.flip()
+
+def show_firing_splash(screen, text, duration=1000):
+    import pygame
+    font = pygame.font.SysFont(None, 72)
+    clock = pygame.time.Clock()
+    start_time = pygame.time.get_ticks()
+    text_surface = font.render(text, True, (255, 255, 0))
+    rect = text_surface.get_rect(center=screen.get_rect().center)
+    while pygame.time.get_ticks() - start_time < duration:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+        screen.fill((25, 40, 60))
+        screen.blit(text_surface, rect)
+        pygame.display.flip()
+        clock.tick(60)
+
+def animate_firing_shot(screen, boat_manager, attacker, defender, target_row, target_col,
+                        cell_size, origin_x, origin_y, assets, speed=20):
+    import pygame
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont(None, 48)
+    plane_width, plane_height = cell_size * 2, cell_size * 2
+    plane_scaled = pygame.transform.scale(assets["plane"], (plane_width, plane_height))
+    target_x = origin_x + target_col * cell_size
+    target_y = origin_y + target_row * cell_size
+    plane_x = -plane_width
+    plane_y = target_y - (plane_height - cell_size) // 2
+    plane_center_target = target_x + cell_size // 2
+    effect_spawned = False
+    message_start_time = None
+    message_duration = 1000
+    hits = boat_manager.player_hits[attacker]
+    result = None
+    while plane_x < screen.get_width():
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+        screen.fill((25, 40, 60))
+        draw_grid(screen, boat_manager.rows, boat_manager.cols, cell_size, origin_x, origin_y)
+        # Draw hits/misses
+        for r in range(boat_manager.rows):
+            for c in range(boat_manager.cols):
+                x = origin_x + c * cell_size
+                y = origin_y + r * cell_size
+                if hits[r][c] == "X":
+                    img = pygame.transform.scale(assets["explosion"], (cell_size, cell_size))
+                    screen.blit(img, (x, y))
+                elif hits[r][c] == "O":
+                    img = pygame.transform.scale(assets["smoke"], (cell_size, cell_size))
+                    screen.blit(img, (x, y))
+        plane_center_x = plane_x + plane_width // 2
+        if not effect_spawned and plane_center_x >= plane_center_target:
+            result = boat_manager.fire_at(attacker, defender, target_row, target_col)
+            effect_spawned = True
+            message_start_time = pygame.time.get_ticks()
+        if message_start_time and result:
+            elapsed = pygame.time.get_ticks() - message_start_time
+            if elapsed < message_duration:
+                if result.startswith("sunk:"):
+                    ship_name = result.split(":")[1]
+                    msg = f"Sunk their {ship_name.capitalize()}!"
+                else:
+                    msg = "Hit!" if result == "hit" else "Miss!"
+                text_surf = font.render(msg, True, (255, 215, 0))
+                text_rect = text_surf.get_rect(center=(target_x + cell_size // 2, target_y - 30))
+                screen.blit(text_surf, text_rect)
+        if effect_spawned:
+            effect_img = assets["explosion"] if result == "hit" or (result and result.startswith("sunk:")) else assets["smoke"]
+            effect_scaled = pygame.transform.scale(effect_img, (cell_size, cell_size))
+            screen.blit(effect_scaled, (target_x, target_y))
+        screen.blit(plane_scaled, (plane_x, plane_y))
+        pygame.display.flip()
+        plane_x += speed
+        clock.tick(60)
+    pygame.time.wait(300)
+    return result
