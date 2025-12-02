@@ -19,7 +19,7 @@ def draw_grid(screen, rows, cols, width, height):
     CELL_SIZE = min(cell_width, cell_height)
 
     grid_origin_x = (width - CELL_SIZE*cols) // 2
-    grid_origin_y = (height - CELL_SIZE*rows) // 2
+    grid_origin_y = (height - CELL_SIZE*rows) // 2 + 25
 
     font = pygame.font.SysFont(None, 20)
 
