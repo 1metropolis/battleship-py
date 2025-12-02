@@ -5,8 +5,8 @@ import time
 WHITE = (255, 255, 255)
 
 # Button colors
-BUTTON_COLOR = (70, 140, 255)
-BUTTON_HOVER_COLOR = (110, 170, 255)
+BUTTON_COLOR = (112, 128, 144)
+BUTTON_HOVER_COLOR = (176, 196, 222)
 
 # Dark naval steel background
 BG_COLOR = (18, 32, 47)
@@ -38,15 +38,18 @@ def show_main_menu(screen):
 
     # Load logo
     logo = pygame.image.load("assets/logo.png").convert_alpha()
-    logo = pygame.transform.smoothscale(logo, (450, 120))
+    desired_width = min(600, screen.get_width() - 80)
+    desired_height = int(desired_width * 66 / 398)
+    logo = pygame.transform.smoothscale(logo, (desired_width, desired_height))
     logo_rect = logo.get_rect()
     logo_rect.centerx = screen.get_rect().centerx
-    logo_rect.top = 40
+    logo_rect.top = 125  # Top margin
+
 
     # Button centered under logo
     screen_rect = screen.get_rect()
     button_rect = pygame.Rect(
-        (screen_rect.centerx - BUTTON_WIDTH // 2, logo_rect.bottom + 60),
+        (screen_rect.centerx - BUTTON_WIDTH // 2, int(screen_rect.height * 0.75) - BUTTON_HEIGHT // 2),
         (BUTTON_WIDTH, BUTTON_HEIGHT)
     )
 
@@ -72,18 +75,6 @@ def show_main_menu(screen):
         logo_fade.set_alpha(fade_alpha)
 
         screen.blit(logo_fade, logo_rect)
-
-        # -----------------------------
-        # 2. Vignette background effect
-        # -----------------------------
-        vignette_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-        pygame.draw.circle(
-            vignette_surface,
-            (0, 0, 0, 100),
-            screen_rect.center,
-            max(screen_rect.width, screen_rect.height)
-        )
-        screen.blit(vignette_surface, (0, 0))
 
         # ------------------------------------
         # 3. Pulsing glow effect for the button

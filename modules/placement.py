@@ -1,7 +1,7 @@
 import pygame
 from modules.draw import draw_grid
 import curses
-import firing
+from modules import firing
 
 # Symbols for internal board
 WATER = "~"

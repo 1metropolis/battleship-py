@@ -12,6 +12,7 @@ from modules.placement import placement_phase, start_game
 # load settings
 rows, cols, ships = load_settings()
 
+# initalize pygame
 pygame.init()
 
 # screen dimensions
@@ -22,6 +23,8 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 windowicon = pygame.image.load("assets/icon.png")
 bg = pygame.image.load("assets/battlemap.png")
 bg = pygame.transform.scale(bg, (WIDTH, HEIGHT))
+pygame.mixer.music.load("assets/music.mp3")
+pygame.mixer.music.play(-1)
 
 # window icon and title
 pygame.display.set_icon(windowicon)
