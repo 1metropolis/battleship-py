@@ -3,19 +3,23 @@ from pygame.locals import *
 
 pygame.init()
 
+# screen dimensions
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-screen = pygame.display.set_mode((800, 600))
+# window icon and title
+windowicon = pygame.image.load("assets/icon.png")
+pygame.display.set_icon(windowicon)
 pygame.display.set_caption("Battleship")
 
-# colors
 running = True
 while running:
-    
-    
-    # stop the game
-    for event in pygame.event.get():
-        if event.type == pygame.quit():
-            running = False
+
+    pass
+    # # stop the game
+    # for event in pygame.event.get():
+    #     if event.type == pygame.quit():
+    #         running = False
 
 
 pygame.quit()
