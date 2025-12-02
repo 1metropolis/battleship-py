@@ -77,25 +77,20 @@ def firing_phase(screen, boat_manager):
                 elif event.key == pygame.K_RIGHT:
                     cursor_col = min(cols - 1, cursor_col + 1)
                 elif event.key == pygame.K_SPACE:
-                    # Fire at selected cell
-                    result = boat_manager.fire_at(current_player, other_player, cursor_row, cursor_col)
-                    if result == "hit" or result.startswith("sunk:"):
-                        
-                        animate_shot(screen, boat_manager, current_player, cursor_row, cursor_col, cell_size, origin_x, origin_y, "hit")
-                        
-                        # Check for win
+                    # Animate the shot and fire at the target when plane reaches it
+                    result = animate_shot(screen, boat_manager, current_player, other_player, cursor_row, cursor_col,
+                                        cell_size, origin_x, origin_y)
+
+                    # Check result to determine turn/next steps
+                    if result == "hit" or (result and result.startswith("sunk:")):
+                        # Player gets another turn
                         winner = boat_manager.check_win()
                         if winner:
                             running = False
-                        # Player gets another turn on hit
-                        
                     elif result == "miss":
-                        
-                        animate_shot(screen, boat_manager, current_player, cursor_row, cursor_col, cell_size, origin_x, origin_y, result)
-                        
                         current_player, other_player = other_player, current_player
                         pygame.time.wait(1000)
                         show_splash(screen, f"Player {current_player}'s Turn")
-                    # Repeat → do nothing
+
 
     return f"Player {winner}" if winner else None

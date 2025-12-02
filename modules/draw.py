@@ -138,37 +138,45 @@ def show_splash(screen, text, duration=1000, font_size=72, bg_color=(25, 40, 60)
         pygame.display.flip()
         clock.tick(60)
 
-
-# animate plane attack
-def animate_shot(screen, boat_manager, current_player, target_row, target_col,
-                 cell_size, origin_x, origin_y, hit_type, speed=10):
+# plane bombs the battleship
+def animate_shot(screen, boat_manager, attacker, defender, target_row, target_col,
+                 cell_size, origin_x, origin_y, speed=10):
     """
     Animate a plane flying across the target and spawn hit/miss effect.
-    Displays a temporary "Hit!" or "Miss!" message when the bomb lands.
+    Only calls boat_manager.fire_at when the plane reaches the target.
     """
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 48)
 
+    # Load assets
     plane_img = pygame.image.load("assets/plane.png").convert_alpha()
     explosion_img = pygame.image.load("assets/explosion.png").convert_alpha()
     smoke_img = pygame.image.load("assets/smoke.png").convert_alpha()
 
-    plane_scaled = pygame.transform.scale(plane_img, (cell_size, cell_size))
-    effect_img = explosion_img if hit_type == "hit" else smoke_img
-    effect_scaled = pygame.transform.scale(effect_img, (cell_size, cell_size))
+    # Scale plane to double size
+    plane_width, plane_height = cell_size * 2, cell_size * 2
+    plane_scaled = pygame.transform.scale(plane_img, (plane_width, plane_height))
 
+    # Target position
     target_x = origin_x + target_col * cell_size
     target_y = origin_y + target_row * cell_size
 
-    plane_x = -cell_size
-    plane_y = target_y
+    # Plane vertical centering
+    plane_x = -plane_width
+    plane_y = target_y - (plane_height - cell_size) // 2
 
-    spawned = False
-    screen_width = screen.get_width()
-    message_display_time = 1000  # milliseconds
+    # Plane center target
+    plane_center_target = target_x + cell_size // 2
+    effect_spawned = False
     message_start_time = None
+    message_duration = 1000
 
-    while plane_x < screen_width:
+    # Keep track of displayed effects
+    hits = boat_manager.player_hits[attacker]
+
+    result = None
+
+    while plane_x < screen.get_width():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -178,8 +186,7 @@ def animate_shot(screen, boat_manager, current_player, target_row, target_col,
         from modules.draw import draw_grid
         draw_grid(screen, boat_manager.rows, boat_manager.cols, cell_size, origin_x, origin_y)
 
-        # Draw all existing hits/misses
-        hits = boat_manager.player_hits[current_player]
+        # Draw existing hits/misses
         for r in range(boat_manager.rows):
             for c in range(boat_manager.cols):
                 x = origin_x + c * cell_size
@@ -189,27 +196,40 @@ def animate_shot(screen, boat_manager, current_player, target_row, target_col,
                 elif hits[r][c] == "O":
                     screen.blit(pygame.transform.scale(smoke_img, (cell_size, cell_size)), (x, y))
 
-        # Draw plane
-        screen.blit(plane_scaled, (plane_x, plane_y))
-
-        # Spawn hit/miss effect and message when plane reaches target
-        if not spawned and plane_x >= target_x:
-            screen.blit(effect_scaled, (target_x, target_y))
-            spawned = True
-            message_start_time = pygame.time.get_ticks()  # start the message timer
+        # Check if plane center reaches target center and fire
+        plane_center_x = plane_x + plane_width // 2
+        if not effect_spawned and plane_center_x >= plane_center_target:
+            # Call boat_manager.fire_at to determine hit/miss/sunk
+            result = boat_manager.fire_at(attacker, defender, target_row, target_col)
+            effect_spawned = True
+            message_start_time = pygame.time.get_ticks()
 
         # Draw floating message
-        if message_start_time:
+        if message_start_time and result:
             elapsed = pygame.time.get_ticks() - message_start_time
-            if elapsed < message_display_time:
-                message_text = "Hit!" if hit_type == "hit" else "Miss!"
-                text_surf = font.render(message_text, True, (255, 255, 0))
-                text_rect = text_surf.get_rect(center=(target_x + cell_size//2, target_y - 30))
+            if elapsed < message_duration:
+                if result.startswith("sunk:"):
+                    ship_name = result.split(":")[1]
+                    msg = f"Sunk their {ship_name.capitalize()}!"
+                else:
+                    msg = "Hit!" if result == "hit" else "Miss!"
+                text_surf = font.render(msg, True, (255, 215, 0))
+                text_rect = text_surf.get_rect(center=(target_x + cell_size // 2, target_y - 30))
                 screen.blit(text_surf, text_rect)
+
+        # Draw the bomb/effect only after plane reaches center
+        if effect_spawned:
+            effect_img = explosion_img if result == "hit" or (result and result.startswith("sunk:")) else smoke_img
+            effect_scaled = pygame.transform.scale(effect_img, (cell_size, cell_size))
+            screen.blit(effect_scaled, (target_x, target_y))
+            
+        # Draw plane
+        screen.blit(plane_scaled, (plane_x, plane_y))
 
         pygame.display.flip()
         plane_x += speed
         clock.tick(60)
 
-    # small delay after plane exits
     pygame.time.wait(300)
+    return result
+
