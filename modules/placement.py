@@ -113,6 +113,12 @@ def placement_phase(screen, rows, cols, ships, player_label, boat_manager, playe
 
                     if current_ship_index >= total_ships:
                         boat_manager.set_player_ships(player_num, board)
+                        
+                        screen.fill((15, 30, 50))
+                        draw_grid(screen, rows, cols, cell_size, origin_x, origin_y)
+                        draw_placed_ships(screen, board, cell_size, origin_x, origin_y)
+                        pygame.display.flip()
+                        pygame.time.wait(2000)
                         return
 
                     # Reset cursor for next ship
