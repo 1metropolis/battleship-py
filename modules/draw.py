@@ -365,7 +365,6 @@ def animate_shot(screen, boat_manager, attacker, defender, target_row, target_co
     return result
 
 def load_firing_assets():
-    import pygame
     CROSSHAIR_PATH = "assets/crosshair.png"
     SMOKE_PATH = "assets/smoke.png"
     EXPLOSION_PATH = "assets/explosion.png"
@@ -378,7 +377,6 @@ def load_firing_assets():
     }
 
 def draw_firing_screen(screen, rows, cols, cell_size, origin_x, origin_y, hits, crosshair_row, crosshair_col, instruction_text, assets):
-    import pygame
     screen.fill((25, 40, 60))
     draw_grid(screen, rows, cols, cell_size, origin_x, origin_y)
     # Draw hits/misses
@@ -402,7 +400,6 @@ def draw_firing_screen(screen, rows, cols, cell_size, origin_x, origin_y, hits, 
     pygame.display.flip()
 
 def show_firing_splash(screen, text, duration=1000):
-    import pygame
     font = pygame.font.SysFont(None, 72)
     clock = pygame.time.Clock()
     start_time = pygame.time.get_ticks()
@@ -420,7 +417,6 @@ def show_firing_splash(screen, text, duration=1000):
 
 def animate_firing_shot(screen, boat_manager, attacker, defender, target_row, target_col,
                         cell_size, origin_x, origin_y, assets, speed=20):
-    import pygame
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 48)
     plane_width, plane_height = cell_size * 2, cell_size * 2

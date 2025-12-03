@@ -16,10 +16,10 @@ def firing_phase(screen, boat_manager):
 
     # initialize crosshair position and game state
     cursor_row, cursor_col = 0, 0
-    running = True
+    aiming = True
     winner = None
 
-    while running:
+    while aiming:
         # calculate grid cell size and origin for current screen size
         cell_size = draw.compute_cell_size(rows, cols, screen.get_width(), screen.get_height())
         origin_x, origin_y = draw.compute_grid_origin(rows, cols, cell_size, screen.get_width(), screen.get_height())
@@ -52,6 +52,12 @@ def firing_phase(screen, boat_manager):
                     cursor_col = min(cols - 1, cursor_col + 1)
                 # fire at selected cell when space is pressed
                 elif event.key == pygame.K_SPACE:
+                    # Check if spot was already targeted (hit or miss)
+                    hits = boat_manager.player_hits[current_player]
+                    if hits[cursor_row][cursor_col] in ["X", "O"]:
+                        # Already fired here - optionally show feedback
+                        continue
+                    
                     result = draw.animate_firing_shot(
                         screen, boat_manager, current_player, other_player,
                         cursor_row, cursor_col, cell_size, origin_x, origin_y, assets
@@ -60,10 +66,11 @@ def firing_phase(screen, boat_manager):
                     if result == "hit" or (result and result.startswith("sunk:")):
                         winner = boat_manager.check_win()
                         if winner:
-                            running = False
+                            aiming = False
                     elif result == "miss":
                         current_player, other_player = other_player, current_player
                         pygame.time.wait(1000)
                         draw.show_firing_splash(screen, f"Player {current_player}'s Turn")
     # return winner if there is one otherwise return none
+    winner = boat_manager.check_win()
     return f"Player {winner}" if winner else None
