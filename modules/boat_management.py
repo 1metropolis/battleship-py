@@ -131,8 +131,10 @@ class BoatManager:
         Returns the winning player (1 or 2) if all ships of a player are sunk.
         Else returns None.
         """
+        ship_chars = {"C", "B", "R", "U", "D"}
         for player in [1, 2]:
             board = self.player_boards[player]
-            if all(cell == "~" or cell == "X" for row in board for cell in row):
+            if not any(cell in ship_chars for row in board for cell in row):
                 return 2 if player == 1 else 1
         return None
+
