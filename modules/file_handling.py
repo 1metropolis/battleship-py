@@ -6,7 +6,7 @@
 import json
 import os
 
-SHIP_LENGTHS = { # length
+SHIP_LENGTHS = {  # length
     "carrier": 5,
     "battleship": 4,
     "cruiser": 3,
@@ -14,17 +14,26 @@ SHIP_LENGTHS = { # length
     "destroyer": 2
 }
 
+
 # load settings from the json
 def load_settings(path="settings.json"):
-    
-    # check if file exists
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"{path} not found.")
 
-    # read json file, load json data
-    with open(path, "r") as f:
-        data = json.load(f)
-    
+    try:
+        # check if file exists
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"{path} not found.")
+
+        # read json file, load json data
+        with open(path, "r") as f:
+            data = json.load(f)
+
+    except json.JSONDecodeError:
+        raise ValueError("settings.json contains invalid JSON.")
+    except FileNotFoundError:
+        raise
+    except Exception as e:
+        raise RuntimeError(f"Failed to load settings: {e}")
+
     # if board or ships are not in json
     if "board" not in data or "ships" not in data:
         raise ValueError("settings.json must contain 'board' and 'ships' keys.")
@@ -34,7 +43,7 @@ def load_settings(path="settings.json"):
     cols = data["board"].get("cols", 10)
     ships = data["ships"]
 
-    validate_settings(rows, cols, ships) # make sure these are proper
+    validate_settings(rows, cols, ships)  # make sure these are proper
     return rows, cols, ships
 
 
@@ -75,9 +84,7 @@ def validate_settings(rows, cols, ship_counts):
     return True
 
 
-
 # Backtracking algorithm to bruteforce ship placement
-
 def can_place_all_ships(rows, cols, ship_lengths):
     # Start with an empty grid
     grid = [[0] * cols for _ in range(rows)]
@@ -99,8 +106,9 @@ def place_ship(grid, ships, index):
     for r in range(rows):
         for c in range(cols):
 
-            # Try horizontal placement
+            # Choose placement orientation
             if c + ship_len <= cols and all(grid[r][cc] == 0 for cc in range(c, c + ship_len)):
+                # Horizontal placement
                 for cc in range(c, c + ship_len):
                     grid[r][cc] = 1
 
@@ -110,8 +118,8 @@ def place_ship(grid, ships, index):
                 for cc in range(c, c + ship_len):
                     grid[r][cc] = 0
 
-            # Try vertical placement
-            if r + ship_len <= rows and all(grid[rr][c] == 0 for rr in range(r, r + ship_len)):
+            elif r + ship_len <= rows and all(grid[rr][c] == 0 for rr in range(r, r + ship_len)):
+                # Vertical placement
                 for rr in range(r, r + ship_len):
                     grid[rr][c] = 1
 
@@ -120,5 +128,9 @@ def place_ship(grid, ships, index):
 
                 for rr in range(r, r + ship_len):
                     grid[rr][c] = 0
+
+            else:
+                # Cannot place ship here in either orientation
+                continue
 
     return False
